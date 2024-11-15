@@ -1,8 +1,14 @@
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import { Text } from "@mantine/core";
+import { AuthenticationForm } from "../components/Auth/Form";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../src/firebase";
 
 function App() {
+  onAuthStateChanged(auth, (user) => {
+    console.log(user);
+  });
   return (
     <main className="container">
       <h1>Welcome to Tauri + React</h1>
@@ -19,6 +25,7 @@ function App() {
         </a>
       </div>
       <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      <AuthenticationForm auth={auth} db={db} />
 
       <Text size="lg">Mantine Check</Text>
     </main>
