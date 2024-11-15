@@ -14,6 +14,7 @@ import {
   Stack,
   Modal,
   PinInput,
+  Flex,
 } from "@mantine/core";
 import {
   signInWithEmailAndPassword,
@@ -73,7 +74,7 @@ export function AuthenticationForm(props: PaperProps) {
       radius="md"
       p="xl"
       style={{
-        width: "40vw",
+        width: "90vw",
         marginLeft: "auto",
         marginRight: "auto",
         marginBottom: "20vh",
@@ -161,7 +162,7 @@ export function AuthenticationForm(props: PaperProps) {
         </Button>
       </Modal>
       <Text size="lg" fw={500}>
-        Welcome to Mantine, {type} with
+        {upperFirst(type)}
       </Text>
 
       <Group grow mb="md" mt="md">
@@ -201,7 +202,7 @@ export function AuthenticationForm(props: PaperProps) {
           Google
         </GoogleButton>
         <PhoneButton onClick={open} radius="xl">
-          Phone Number
+          Phone
         </PhoneButton>
       </Group>
 
@@ -294,13 +295,8 @@ export function AuthenticationForm(props: PaperProps) {
           />
         </Stack>
 
-        <Group justify="space-between" mt="xl">
-          <Anchor
-            component="button"
-            type="button"
-            c="dimmed"
-            onClick={() => toggle()}
-            size="xs">
+        <Flex direction="column" gap="lg" mt="xl">
+          <Anchor type="button" c="dimmed" onClick={() => toggle()} size="xs">
             {type === "register"
               ? "Already have an account? Login"
               : "Don't have an account? Register"}
@@ -308,7 +304,7 @@ export function AuthenticationForm(props: PaperProps) {
           <Button type="submit" radius="xl">
             {upperFirst(type)}
           </Button>
-        </Group>
+        </Flex>
       </form>
     </Paper>
   );

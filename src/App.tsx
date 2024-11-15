@@ -1,4 +1,5 @@
 import "./App.css";
+import "@mantine/notifications/styles.css";
 import { useContext } from "react";
 
 import { AuthView } from "../components/Auth/View";

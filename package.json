@@ -13,6 +13,7 @@
     "@mantine/core": "^7.14.0",
     "@mantine/form": "^7.14.0",
     "@mantine/hooks": "^7.14.0",
+    "@mantine/notifications": "^7.14.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-shell": "^2",
     "firebase": "^11.0.2",

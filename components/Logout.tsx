@@ -10,7 +10,13 @@ export function Logout() {
   const { auth, setUser } = authData;
   return (
     <Button
-      variant="default"
+      variant="gradient"
+      gradient={{ from: "red", to: "orange" }}
+      style={{
+        position: "absolute",
+        top: "3vw",
+        left: "3vw",
+      }}
       onClick={() => {
         auth.signOut();
         setUser(null);
