@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useToggle, upperFirst, useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import {
@@ -23,29 +23,21 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
-  Auth,
 } from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  Firestore,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { GoogleButton } from "./GoogleButton";
 import { PhoneButton } from "./PhoneButton";
+import { User } from "../../src/models";
+import { AuthContext } from "../../src/authContext";
 
 const PASSWORD_MIN_LENGTH = 6;
 
-export function AuthenticationForm({
-  auth,
-  db,
-  ...props
-}: PaperProps & {
-  auth: Auth;
-  db: Firestore;
-}) {
+export function AuthenticationForm(props: PaperProps) {
+  const authData = useContext(AuthContext);
+  if (authData === null) {
+    return;
+  }
+  const { db, auth, setUser } = authData;
   const [captchaPassed, setCaptchaPassed] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const [type, toggle] = useToggle(["login", "register"]);
@@ -77,7 +69,17 @@ export function AuthenticationForm({
   });
 
   return (
-    <Paper radius="md" p="xl" withBorder {...props}>
+    <Paper
+      radius="md"
+      p="xl"
+      style={{
+        width: "40vw",
+        marginLeft: "auto",
+        marginRight: "auto",
+        marginBottom: "20vh",
+      }}
+      withBorder
+      {...props}>
       <div id="captcha"></div>
       <Modal opened={opened} onClose={close} title="Phone Sign In">
         {phoneCodeConfirmer !== null ? (
@@ -90,20 +92,42 @@ export function AuthenticationForm({
               phoneCodeConfirmer
                 .confirm(value)
                 .then(({ user: { uid, displayName } }) => {
-                  addDoc(collection(db, "users"), {
-                    id: uid,
-                    name: displayName,
-                  })
-                    .then(({ id }) => {
-                      localStorage.setItem("targetDocument", id);
-                      close();
-                    })
-                    .catch(() => {
-                      // failed to save user doc
-                    });
+                  const q = query(
+                    collection(db, "users"),
+                    where("id", "==", uid)
+                  );
+                  let type = "login";
+                  let data = {} as User;
+                  getDocs(q).then((querySnapshot) => {
+                    if (querySnapshot.docs.length == 0) {
+                      type = "register";
+                    }
+                    data = querySnapshot.docs[0].data() as User;
+                  });
+                  if (type === "register") {
+                    const data = {
+                      id: uid,
+                      name: displayName,
+                      driver: false,
+                    } as User;
+                    addDoc(collection(db, "users"), data)
+                      .then(({ id }) => {
+                        localStorage.setItem("targetDocument", id);
+                        setUser(data);
+                        close();
+                      })
+                      .catch((e) => {
+                        console.log(e);
+                        // failed to save user doc
+                      });
+                    setUser(data);
+                    return;
+                  }
+                  setUser(data);
                   // signed in
                 })
-                .catch(() => {
+                .catch((e) => {
+                  console.log(e);
                   // invalid code
                 });
             }}
@@ -151,19 +175,25 @@ export function AuthenticationForm({
                 if (!crediential) {
                   return;
                 }
-                const { uid, displayName } = result.user;
-                addDoc(collection(db, "users"), {
-                  id: uid,
-                  name: displayName,
-                })
-                  .then(({ id }) => {
+                const { uid } = result.user;
+
+                const q = query(
+                  collection(db, "users"),
+                  where("id", "==", uid)
+                );
+                getDocs(q)
+                  .then((querySnapshot) => {
+                    const { id } = querySnapshot.docs[0];
                     localStorage.setItem("targetDocument", id);
+                    setUser(querySnapshot.docs[0].data() as User);
                   })
-                  .catch(() => {
-                    // failed to save user doc
+                  .catch((e) => {
+                    console.log(e);
+                    // failed to fetch user doc
                   });
               })
-              .catch(() => {
+              .catch((e) => {
+                console.log(e);
                 // failed to login with google
               });
           }}
@@ -183,18 +213,23 @@ export function AuthenticationForm({
           if (type === "register") {
             createUserWithEmailAndPassword(auth, email, password)
               .then(({ user: { uid } }) => {
-                addDoc(collection(db, "users"), {
+                const data = {
                   id: uid,
                   name: name,
-                })
+                  driver: false,
+                } as User;
+                addDoc(collection(db, "users"), data)
                   .then(({ id }) => {
                     localStorage.setItem("targetDocument", id);
+                    setUser(data);
                   })
-                  .catch(() => {
+                  .catch((e) => {
+                    console.log(e);
                     // failed to save user doc
                   });
               })
-              .catch(() => {
+              .catch((e) => {
+                console.log(e);
                 // failed to create user
               });
             return;
@@ -204,15 +239,17 @@ export function AuthenticationForm({
               const q = query(collection(db, "users"), where("id", "==", uid));
               getDocs(q)
                 .then((querySnapshot) => {
-                  querySnapshot.forEach(({ id }) => {
-                    localStorage.setItem("targetDocument", id);
-                  });
+                  const { id } = querySnapshot.docs[0];
+                  localStorage.setItem("targetDocument", id);
+                  setUser(querySnapshot.docs[0].data() as User);
                 })
-                .catch(() => {
+                .catch((e) => {
+                  console.log(e);
                   // failed to fetch user doc
                 });
             })
-            .catch(() => {
+            .catch((e) => {
+              console.log(e);
               // failed to login user
             });
         })}>

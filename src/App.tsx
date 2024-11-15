@@ -1,27 +1,24 @@
-import reactLogo from "./assets/react.svg";
 import "./App.css";
-import { px, Text } from "@mantine/core";
-import { AuthenticationForm } from "../components/Auth/Form";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../src/firebase";
+import { useContext } from "react";
+
+import { AuthView } from "../components/Auth/View";
+import { DriverView } from "../components/DriverView/View";
+import { UserView } from "../components/UserView/View";
+import { AuthContext } from "./authContext";
 
 function App() {
-  onAuthStateChanged(auth, (user) => {
-    console.log(user);
-  });
-  return (
-    <main className="container">
-      <img className="logo" src="images.png" width={175} height={150}></img>
-      
-      <h1>Welcome to Pickupp</h1>
-      
-
-     
-      <AuthenticationForm auth={auth} db={db} />
-
-      <Text size="lg">Made by PixelEngineers</Text>
-    </main>
-  );
+  const authData = useContext(AuthContext);
+  if (authData === null) {
+    return;
+  }
+  const { user } = authData;
+  if (user === null) {
+    return <AuthView />;
+  }
+  if (user.driver) {
+    return <DriverView />;
+  }
+  return <UserView />;
 }
 
 export default App;
