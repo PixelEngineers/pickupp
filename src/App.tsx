@@ -11,10 +11,8 @@ function App() {
   });
   return (
     <main className="container">
-      <img className="logo" src="images.png" width={175} height={150}>
-        
+      <img className="logo" src="images.png" width={175} height={150}></img>
       
-      </img>
       <h1>Welcome to Pickupp</h1>
       
 
