@@ -30,6 +30,7 @@ import { GoogleButton } from "./GoogleButton";
 import { PhoneButton } from "./PhoneButton";
 import { User } from "../../src/models";
 import { AuthContext } from "../../src/authContext";
+import { notifications } from "@mantine/notifications";
 
 const PASSWORD_MIN_LENGTH = 6;
 
@@ -118,8 +119,13 @@ export function AuthenticationForm(props: PaperProps) {
                         close();
                       })
                       .catch((e) => {
-                        console.log(e);
                         // failed to save user doc
+                        notifications.show({
+                          title: "Failed to save user data",
+                          message: "Maybe try again later",
+                          color: "red",
+                        });
+                        console.log(e);
                       });
                     setUser(data);
                     return;
@@ -128,8 +134,13 @@ export function AuthenticationForm(props: PaperProps) {
                   // signed in
                 })
                 .catch((e) => {
-                  console.log(e);
                   // invalid code
+                  notifications.show({
+                    title: "Invalid code",
+                    message: "Please try again",
+                    color: "red",
+                  });
+                  console.log(e);
                 });
             }}
             oneTimeCode
@@ -146,6 +157,11 @@ export function AuthenticationForm(props: PaperProps) {
         <Button
           onClick={() => {
             if (!captchaPassed) {
+              notifications.show({
+                title: "Captcha Failed",
+                message: "Please try again",
+                color: "red",
+              });
               // captcha failed
               return;
             }
@@ -153,9 +169,19 @@ export function AuthenticationForm(props: PaperProps) {
               auth,
               phone,
               (window as any).recaptchaVerifier
-            ).then((confirmationResult) => {
-              setPhoneCodeConfirmer(confirmationResult);
-            });
+            )
+              .then((confirmationResult) => {
+                setPhoneCodeConfirmer(confirmationResult);
+              })
+              .catch((e) => {
+                // failed to login with phone
+                notifications.show({
+                  title: "Failed to login with phone",
+                  message: "Please try again",
+                  color: "red",
+                });
+                console.log(e);
+              });
           }}
           radius="xl">
           Send Code
@@ -189,13 +215,23 @@ export function AuthenticationForm(props: PaperProps) {
                     setUser(querySnapshot.docs[0].data() as User);
                   })
                   .catch((e) => {
-                    console.log(e);
                     // failed to fetch user doc
+                    console.log(e);
+                    notifications.show({
+                      title: "Failed to fetch user data",
+                      message: "Maybe try again later",
+                      color: "red",
+                    });
                   });
               })
               .catch((e) => {
-                console.log(e);
                 // failed to login with google
+                console.log(e);
+                notifications.show({
+                  title: "Failed to login with google",
+                  message: "Please try again",
+                  color: "red",
+                });
               });
           }}
           radius="xl">
@@ -225,13 +261,23 @@ export function AuthenticationForm(props: PaperProps) {
                     setUser(data);
                   })
                   .catch((e) => {
-                    console.log(e);
                     // failed to save user doc
+                    console.log(e);
+                    notifications.show({
+                      title: "Failed to save user data",
+                      message: "Maybe try again later",
+                      color: "red",
+                    });
                   });
               })
               .catch((e) => {
-                console.log(e);
                 // failed to create user
+                console.log(e);
+                notifications.show({
+                  title: "Failed to create user",
+                  message: "Please try again",
+                  color: "red",
+                });
               });
             return;
           }
@@ -245,13 +291,23 @@ export function AuthenticationForm(props: PaperProps) {
                   setUser(querySnapshot.docs[0].data() as User);
                 })
                 .catch((e) => {
-                  console.log(e);
                   // failed to fetch user doc
+                  console.log(e);
+                  notifications.show({
+                    title: "Failed to fetch user data",
+                    message: "Maybe try again later",
+                    color: "red",
+                  });
                 });
             })
             .catch((e) => {
-              console.log(e);
               // failed to login user
+              console.log(e);
+              notifications.show({
+                title: "Failed to login user",
+                message: "Please try again",
+                color: "red",
+              });
             });
         })}>
         <Stack>

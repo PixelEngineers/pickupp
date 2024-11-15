@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../src/authContext";
 
 export function Logout() {
